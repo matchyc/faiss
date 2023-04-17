@@ -56,8 +56,10 @@ cublasStatus_t rawGemm(
     //
     // Only use the PEDANTIC implementation if the input matrices are f16
     // and we are on CUDA 11+
-#if CUDA_VERSION >= 11000
-    if (cAT == CUDA_R_16F || cBT == CUDA_R_16F) {
+// #if CUDA_VERSION >= 11000
+    // if (cAT == CUDA_R_16F || cBT == CUDA_R_16F) {
+        // use cublasGemmEx with tensor cores
+
         return cublasGemmEx(
                 handle,
                 transa,
@@ -76,30 +78,34 @@ cublasStatus_t rawGemm(
                 C,
                 CUDA_R_32F,
                 ldc,
-                CUBLAS_COMPUTE_32F_PEDANTIC,
-                CUBLAS_GEMM_DEFAULT);
-    }
-#endif
+                // CUBLAS_COMPUTE_32F_PEDANTIC,
+                // CUBLAS_COMPUTE_32F_FAST_16F,
+                CUBLAS_COMPUTE_16F,
+                // CUBLAS_GEMM_DEFAULT
+                CUBLAS_GEMM_DEFAULT_TENSOR_OP 
+            );
+    // }
+// #endif
 
     // Always accumulate in f32
-    return cublasSgemmEx(
-            handle,
-            transa,
-            transb,
-            m,
-            n,
-            k,
-            &fAlpha,
-            A,
-            cAT,
-            lda,
-            B,
-            cBT,
-            ldb,
-            &fBeta,
-            C,
-            CUDA_R_32F,
-            ldc);
+    // return cublasSgemmEx(
+    //         handle,
+    //         transa,
+    //         transb,
+    //         m,
+    //         n,
+    //         k,
+    //         &fAlpha,
+    //         A,
+    //         cAT,
+    //         lda,
+    //         B,
+    //         cBT,
+    //         ldb,
+    //         &fBeta,
+    //         C,
+    //         CUDA_R_32F,
+    //         ldc);
 }
 
 template <typename AT, typename BT>
